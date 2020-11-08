@@ -1,15 +1,15 @@
 body {
     text-align: justify;
     background-size: cover;
-    background-color: #acbdee;
+    background-color: #fffad3;
 }
 
-#encoding{
-    width: 50%;
-    margin-left: 25%;
+.encodingContainer{
+    width: 60%;
+    margin-left: 20%;
     display: flex;
     flex-direction: column;
-
+    margin-bottom: 5vw;
 }
 
 .inputLine{
@@ -19,15 +19,17 @@ body {
 }
 
 .input{
-    width: 75%;
+    width: 70%;
 }
 
 .buttonsLine{
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
 }
 
 .button{
     width: 10vw;
-    background-color: #ffffff;
+    background-color: #FFB773;
+    margin-bottom: 1vw;
 }

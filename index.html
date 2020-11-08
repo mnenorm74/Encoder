@@ -10,24 +10,31 @@
     <p>Лабораторная работа №3</p>
     <p>Авторы: Бурсина О. И., Боталов П. Е., Коновалова В.П.</p>
 </div>
-<div id="encoding">
-    <div class="inputLine" id="originalTextLine">
+<div class="encodingContainer">
+    <div class="inputLine" id="keySetOriginalTextLine">
         <p>Исходный текст</p>
-        <textarea id="originalText" class="input"></textarea>
+        <textarea id="keySetOriginalText" class="input"></textarea>
     </div>
-    <div class="inputLine" id="keyLine">
+    <div class="inputLine" id="keySetKeyLine">
         <p>Ключ</p>
-        <textarea id="keyText" class="input"></textarea>
+        <textarea id="keySetKeyText" class="input"></textarea>
     </div>
-    <div class="inputLine" id="encryptedTextLine">
+    <div class="inputLine" id="keySetLine">
+        <p>Группа ключей</p>
+        <textarea id="keySetText" class="input"></textarea>
+    </div>
+    <div class="inputLine" id="keySetEncryptedTextLine">
         <p>Зашифрованный текст</p>
-        <textarea id="EncryptedText" class="input"></textarea>
+        <textarea id="keySetEncryptedText" class="input"></textarea>
     </div>
-    <div class="buttonsLine" id="encodingButtons">
-        <button class="button" id="keyGenerationButton">Сгенерировать ключ по тексту</button>
-        <button class="button" id="encryptButton">Зашифровать текст</button>
-        <button class="button" id="decipherButton">Расшифровать текст</button>
+    <div class="buttonsLine" id="keySetEncodingButtons">
+        <button class="button" id="keySetKeyGenerationButton">Сгенерировать ключи</button>
+        <button class="button" id="keySetEncryptButton">Зашифровать текст</button>
+        <button class="button" id="keySetDecipherButton">Расшифровать текст</button>
+        <button class="button" id="saveKeySetButton">Сохранить набор ключей</button>
+        <button class="button" id="keySetClearEncodingFields">Очистить</button>
     </div>
 </div>
+<script type="text/javascript" src="index.js"></script>
 </body>
 </html>
