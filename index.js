@@ -6,25 +6,25 @@ function normalizeHex(hex){
     return normalizedHex;
 }
 
-String.prototype.hexEncode = function () {
+function convertToHex(text){
     let hex = [];
-    for (let i = 0; i < this.length; i++) {
-        let symbol = this.charCodeAt(i).toString(16);
-        let normalizedHex = normalizeHex(symbol)
+    for (let i = 0; i < text.length; i++) {
+        let symbol = text.charCodeAt(i).toString(16);
+        let normalizedHex = normalizeHex(symbol);
         hex.push(normalizedHex);
     }
     return hex;
-};
+}
 
-String.prototype.hexDecode = function () {
-    let symbols = this.split(' ');
+function convertToString(hex) {
+    let symbols = hex.split(' ');
     let line = "";
     for (let i = 0; i < symbols.length; i++) {
         let number = parseInt(symbols[i], 16);
         line += String.fromCharCode(number);
     }
     return line;
-};
+}
 
 function generateKey(length) {
     let key = '';
@@ -92,13 +92,13 @@ function clearFields() {
 function generateKeySetClick() {
     let keySetField = document.getElementById('keySetText');
     let keyField = document.getElementById('keySetKeyText');
-    let length = document.getElementById('keySetOriginalText').value.hexEncode().length;
+    let length = convertToHex(document.getElementById('keySetOriginalText').value).length;
     keySetField.value = generateKeySet(length);
     keyField.value = keySetField.value.split('\n')[Math.floor(Math.random() * 10)];
 }
 
 function encryptTextClick() {
-    let text = document.getElementById('keySetOriginalText').value.hexEncode();
+    let text = convertToHex(document.getElementById('keySetOriginalText').value);
     let keyParts = document.getElementById('keySetKeyText').value.split(' ');
     let encryptedTextField = document.getElementById('keySetEncryptedText');
     keyParts = getKeyFromSet(keyParts);
@@ -110,7 +110,7 @@ function decryptTextClick() {
     let keyParts = document.getElementById('keySetKeyText').value.split(' ');
     let textField = document.getElementById('keySetOriginalText');
     keyParts = getKeyFromSet(keyParts);
-    textField.value = encrypt(encryptedParts, keyParts).hexDecode();
+    textField.value = convertToString(encrypt(encryptedParts, keyParts));
 }
 
 function saveKeySetClick() {
