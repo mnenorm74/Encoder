@@ -7,52 +7,61 @@ function normalizeHex(hex){
 }
 
 String.prototype.hexEncode = function () {
-    let result = [];
+    let hex = [];
     for (let i = 0; i < this.length; i++) {
-        let hex = this.charCodeAt(i).toString(16);
-        let normalizedHex = normalizeHex(hex)
-        result.push(normalizedHex);
+        let symbol = this.charCodeAt(i).toString(16);
+        let normalizedHex = normalizeHex(symbol)
+        hex.push(normalizedHex);
     }
-    return result;
+    return hex;
 };
 
 String.prototype.hexDecode = function () {
-    let hexes = this.split(' ') || [];
-    let result = "";
-    for (let i = 0; i < hexes.length; i++) {
-        result += String.fromCharCode(parseInt(hexes[i], 16));
+    let symbols = this.split(' ');
+    let line = "";
+    for (let i = 0; i < symbols.length; i++) {
+        let number = parseInt(symbols[i], 16);
+        line += String.fromCharCode(number);
     }
-    return result;
+    return line;
 };
 
-function generateKey(keyLength) {
+function generateKey(length) {
     let key = '';
-    for (let i = 0; i < keyLength; i++) {
-        let isLast = i === keyLength - 1;
-        let number = (Math.random() * 0xFFF << 0).toString(16);
-        key += ('00' + number).slice(-3) + (isLast ? '' : ' ');
+    for (let i = 0; i < length; i++) {
+        let hex = Math.random() * 0xFFF << 0;
+        let normalizedNumber = normalizeHex(hex.toString(16));
+        key += normalizedNumber;
+        if(i !== length - 1)
+            key += ' ';
     }
     return key;
 }
 
-function generateKeySet(keyLength) {
-    let currentKeys = generateKey(keyLength).split(' ');
+function generateKeySet(length, count = 10) {
+    let keys = generateKey(length).split(' ');
     let keySet = '';
-    for (let i = 0; i < 10; i++) {
-        let salt = (Math.random() * 0xFFF << 0).toString(16);
-        keySet += ('00' + salt).slice(-3) + ' ';
-        for (let j = 0; j < currentKeys.length; j++) {
-            let isLast = j === currentKeys.length - 1;
-            let number = (parseInt(currentKeys[j], 16) ^ parseInt(salt, 16)).toString(16);
-            keySet += ('00' + number).slice(-3) + (isLast ? '' : ' ');
+    for (let i = 0; i < count; i++) {
+        let number = Math.random() * 0xFFF << 0;
+        let salt = number.toString(16);
+        keySet += normalizeHex(salt) + ' ';
+        for (let j = 0; j < keys.length; j++) {
+            keySet += generateSum(keys[j], salt)
+            if(j !== keys.length - 1)
+                keySet += ' ';
         }
-        if (i !== 9)
+        if (i !== count - 1)
             keySet += '\n';
     }
     return keySet;
 }
 
-function recoverKey(keys) {
+function generateSum(keyPart, salt){
+    let number = (parseInt(keyPart, 16) ^ parseInt(salt, 16)).toString(16);
+    return normalizeHex(number);
+}
+
+function getKeyFromSet(keys) {
     let salt = keys.shift();
     for (let i = 0; i < keys.length; i++) {
         keys[i] = (parseInt(keys[i], 16) ^ parseInt(salt, 16)).toString(16);
@@ -61,21 +70,16 @@ function recoverKey(keys) {
 }
 
 function encrypt(codes, keys) {
-    let cipher = '';
+    let encryptedText = '';
     for (let i = 0; i < codes.length; i++) {
-        let isLast = i === codes.length - 1;
         let number = (parseInt(codes[i], 16) ^ parseInt(keys[i], 16)).toString(16);
-        cipher += ('00' + number).slice(-3) + (isLast ? '' : ' ');
+        let normalizedNumber = normalizeHex(number);
+        encryptedText += normalizedNumber;
+        if(i !== codes.length - 1)
+            encryptedText += ' ';
     }
-    return cipher;
+    return encryptedText;
 }
-
-
-document.getElementById('keySetClearEncodingFields').addEventListener('click', clearFields);
-document.getElementById('keySetKeyGenerationButton').addEventListener('click', generateKeySetClick);
-document.getElementById('keySetEncryptButton').addEventListener('click', encryptTextClick);
-document.getElementById('keySetDecipherButton').addEventListener('click', decryptTextClick);
-document.getElementById('saveKeySetButton').addEventListener('click', saveKeySetClick);
 
 
 function clearFields() {
@@ -86,43 +90,27 @@ function clearFields() {
 }
 
 function generateKeySetClick() {
-    let keyLength = document.getElementById('keySetOriginalText').value.hexEncode().length;
-    let keySet = document.getElementById('keySetText');
-    let key = document.getElementById('keySetKeyText');
-    keySet.value = generateKeySet(keyLength);
-    key.value = keySet.value.split('\n')[Math.floor(Math.random() * 10)];
+    let keySetField = document.getElementById('keySetText');
+    let keyField = document.getElementById('keySetKeyText');
+    let length = document.getElementById('keySetOriginalText').value.hexEncode().length;
+    keySetField.value = generateKeySet(length);
+    keyField.value = keySetField.value.split('\n')[Math.floor(Math.random() * 10)];
 }
 
 function encryptTextClick() {
-    let codes = document.getElementById('keySetOriginalText').value.hexEncode();
-    let key = document.getElementById('keySetKeyText').value.split(' ');
-    let cipher = document.getElementById('keySetEncryptedText');
-    /*if (key.length === 1 && key[0] === '') {
-        cipher.value = 'Сначала нужно сгенерировать ключ';
-        return;
-    }
-    if (key.length - 1 !== codes.length) {
-        cipher.value = 'Длины ключа и текста не совпадают';
-        return;
-    }*/
-    key = recoverKey(key);
-    cipher.value = encrypt(codes, key);
+    let text = document.getElementById('keySetOriginalText').value.hexEncode();
+    let keyParts = document.getElementById('keySetKeyText').value.split(' ');
+    let encryptedTextField = document.getElementById('keySetEncryptedText');
+    keyParts = getKeyFromSet(keyParts);
+    encryptedTextField.value = encrypt(text, keyParts);
 }
 
 function decryptTextClick() {
-    let codes = document.getElementById('keySetEncryptedText').value.split(' ');
-    let key = document.getElementById('keySetKeyText').value.split(' ');
-    let text = document.getElementById('keySetOriginalText');
-    /*if (key.length === 1 && key[0] === '') {
-        text.value = 'Введите ключ';
-        return;
-    }
-    if (key.length - 1 !== codes.length) {
-        text.value = 'Длины ключа и шифра не совпадают';
-        return;
-    }*/
-    key = recoverKey(key);
-    text.value = encrypt(codes, key).hexDecode();
+    let encryptedParts = document.getElementById('keySetEncryptedText').value.split(' ');
+    let keyParts = document.getElementById('keySetKeyText').value.split(' ');
+    let textField = document.getElementById('keySetOriginalText');
+    keyParts = getKeyFromSet(keyParts);
+    textField.value = encrypt(encryptedParts, keyParts).hexDecode();
 }
 
 function saveKeySetClick() {
@@ -135,4 +123,10 @@ function saveKeySetClick() {
     link.click();
     document.body.removeChild(link);
 }
+
+document.getElementById('keySetClearEncodingFields').addEventListener('click', clearFields);
+document.getElementById('keySetKeyGenerationButton').addEventListener('click', generateKeySetClick);
+document.getElementById('keySetEncryptButton').addEventListener('click', encryptTextClick);
+document.getElementById('keySetDecipherButton').addEventListener('click', decryptTextClick);
+document.getElementById('saveKeySetButton').addEventListener('click', saveKeySetClick);
 
